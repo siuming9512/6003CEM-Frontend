@@ -1,14 +1,26 @@
 import { UploadOutlined } from "@ant-design/icons";
 import { Button, Form, Input, InputNumber, Radio, Select, Upload } from "antd";
 import axios from "axios";
+import { useEffect, useState } from "react";
+import { useQuery } from "react-query";
 
 
+
+const getBreeds = async () => {
+    const { data } = await axios.get('https://api.thecatapi.com/v1/breeds?limit=1000&page=0')
+
+    return data.map(x => ({label: x.name, value: x.name}))
+}
 
 const PetForm = ({ pet, onSubmit }) => {
+    const { isSuccess: breedIsSuccess, data: breeds } = useQuery({ queryKey: ['breeds'], queryFn: getBreeds, }, {staleTime: Infinity})
+
     const petFormOnSubmit = (values) => {
         onSubmit(values)
         form.resetFields();
     }
+
+    const [fileList, setFileList] = useState([])
 
     const uploadTmpImage = async ({ file, onSuccess }) => {
         let formData = new FormData()
@@ -27,14 +39,46 @@ const PetForm = ({ pet, onSubmit }) => {
 
     const uploadOnChange = ({ file, fileList }) => {
         if (file.status == 'done') {
-            console.log(file);
             form.setFieldValue('fileName', file.response)
         }
+
+        setFileList(fileList)
     }
+
+    let formInitValues = null
+
+    useEffect(() => {
+        console.log(pet);
+        if (!!pet) {
+            form.setFieldsValue({
+                petId: pet.id,
+                variety: pet.variety,
+                gender: pet.gender,
+                age: pet.age,
+                upload: {
+                    file: {
+                        status: 'done',
+                        url: pet.imageUrl
+                    }
+                }
+            })
+
+            setFileList([{
+                uid: -1,
+                name: 'orignal.png',
+                status: 'done',
+                url: pet.imageUrl
+            }])
+        } else {
+            setFileList([])
+        }
+    }, [pet])
+
     const [form] = Form.useForm()
     return <Form
         form={form}
         name="petForm"
+        initialValues={formInitValues}
         labelCol={{
             span: 4,
         }}
@@ -49,11 +93,7 @@ const PetForm = ({ pet, onSubmit }) => {
                 },
             ]}
         >
-            <Select>
-                <Select.Option default value="A">A</Select.Option>
-                <Select.Option value="B">B</Select.Option>
-                <Select.Option value="C">C</Select.Option>
-            </Select>
+            <Select showSearch options={breeds}></Select>
         </Form.Item>
 
         <Form.Item
@@ -87,8 +127,15 @@ const PetForm = ({ pet, onSubmit }) => {
         <Form.Item
             name="upload"
             label="Upload"
+            rules={[
+                {
+                    required: true
+                }
+            ]}
         >
-            <Upload name="image" customRequest={uploadTmpImage} listType="picture" onChange={uploadOnChange}>
+            <Upload
+                name="image"
+                maxCount={1} fileList={fileList} customRequest={uploadTmpImage} listType="picture" onChange={uploadOnChange}>
                 {/* <Upload name="image" listType="picture" onChange={uploadOnChange}> */}
                 <Button icon={<UploadOutlined />}> Click to Upload</Button>
             </Upload>
@@ -100,6 +147,12 @@ const PetForm = ({ pet, onSubmit }) => {
                     required: true,
                 },
             ]}
+            noStyle
+        >
+            <Input type="hidden" />
+        </Form.Item>
+        <Form.Item
+            name="petId"
             noStyle
         >
             <Input type="hidden" />

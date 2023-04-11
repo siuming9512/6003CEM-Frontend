@@ -11,7 +11,7 @@ const PetCard = ({ pet, children, actions }) => {
         actions={actions}
         >
         {children}
-        <img width="100%" src={pet.imageUrl} />
+        <img width="100%" style={{height: "100px", objectFit: "cover"}} src={pet.imageUrl} />
         <div>Variety: {pet.variety}</div>
         <div>Age: {pet.age}</div>
         <div>Gender: {pet.gender}</div>
