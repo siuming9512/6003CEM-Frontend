@@ -38,7 +38,6 @@ const Admin = () => {
         }
 
         await axios.post("http://localhost:3000/pets", data)
-
     };
 
     const editPet = async (values) => {
