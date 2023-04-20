@@ -1,0 +1,44 @@
+.bubble {
+	position: relative;
+	color: #EEEEEE;
+    padding: 10px;
+    width: max-content;
+    border-radius: 10px;
+    margin: 10px;
+    min-width: 100px;
+    max-width: 320px;
+}
+
+.bubble-left {
+	background-color: #1b5f98;
+}
+
+.bubble-right {
+	margin-left: auto;
+	background-color: #4096ff;
+}
+.bubble-right:after{
+	content: ' ';
+	position: absolute;
+	width: 0;
+	height: 0;
+  left: auto;
+	right: -15px;
+  top: 0px;
+	bottom: auto;
+	border: 15px solid;
+	border-color: #4096ff transparent transparent transparent;
+}
+
+.bubble-left::after {
+	content: ' ';
+	position: absolute;
+	width: 0;
+	height: 0;
+  left: -15px;
+	right: auto;
+  top: 0px;
+	bottom: auto;
+	border: 15px solid;
+	border-color: #1b5f98 transparent transparent transparent;
+}

@@ -1,9 +1,9 @@
 import { HeartFilled, HeartOutlined } from "@ant-design/icons";
 import PetCard from "./PetCard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const UserPetCard = ({ pet, onFavourite }) => {
-    const [favouriteState, setFavouriteState] = useState(pet.isFavourite)
+    const [favouriteState, setFavouriteState] = useState(pet?.isFavourite ?? false)
     let likeIcon = null;
     
     if (favouriteState) {
@@ -12,10 +12,9 @@ const UserPetCard = ({ pet, onFavourite }) => {
         likeIcon = <HeartOutlined style={{ fontSize: "18px", color: "#ff86a7", cursor: "pointer" }} />
     }
 
-
     const onClickFavourite = () => {
         setFavouriteState(!favouriteState)
-        onFavourite(favouriteState)
+        onFavourite(pet.id, !favouriteState)
     }
 
     return <>
