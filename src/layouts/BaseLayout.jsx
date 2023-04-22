@@ -1,8 +1,6 @@
 import { Breadcrumb, Col, Collapse, Layout, Menu, Row, theme } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import LoginBar from '../components/Login/LoginBar';
-import { useContext } from 'react';
-import UserContext from '../contexts/UserContext';
 const { Header, Content, Footer } = Layout;
 
 const items = [
@@ -16,24 +14,19 @@ const items = [
   }
 ]
 const BaseLayout = ({ children }) => {
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
-
   const navigate = useNavigate()
 
-
   return (
-    <Layout className="layout">
+    <Layout className="layout" style={{ height: "100vh" }}>
       <Header>
-        <Row justify="space-between" style={{width: "100%"}}>
+        <Row justify="space-between" style={{ width: "100%" }}>
           <Col span={18}>
             <Menu
               theme="dark"
               mode="horizontal"
               defaultSelectedKeys={['1']}
               items={items}
-              onClick={(e) => {navigate(`/${e.key}`)}}
+              onClick={(e) => { navigate(`/${e.key}`) }}
             />
           </Col>
           <Col>
@@ -47,14 +40,7 @@ const BaseLayout = ({ children }) => {
           height: '100%'
         }}
       >
-        <div
-          className="site-layout-content"
-          style={{
-            background: colorBgContainer,
-          }}
-        >
-          {children}
-        </div>
+        {children}
       </Content>
     </Layout>
   );

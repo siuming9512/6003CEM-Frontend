@@ -1,41 +1,30 @@
 import { Button, Checkbox, Form, Input, Layout, Menu, Radio, Space, message } from 'antd';
 import axios from 'axios';
-import { useContext, useReducer } from 'react';
-import UserContext from '../contexts/UserContext';
+import { useEffect, useReducer } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Content, Header } from 'antd/es/layout/layout';
+import { setUser } from '../store/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectActionLabel, selectActionRadio, selectHaveAc, selectRequireLogin, setActionRadioValue, setRequireLogin } from '../store/loginSlice';
 
 const Login = () => {
     const [messageApi, contextHolder] = message.useMessage();
 
-    const initState = {
-        haveAc: true
-    }
-    const loginReducer = (state, action) => {
-        switch (action.type) {
-            case "NOAC":
-                return {
-                    ...state, haveAc: false
-                }
-            case "HAVEAC":
-                return {
-                    ...state, haveAc: true
-                }
-        }
-    }
-
-
-    const [loginPage, dispatch] = useReducer(loginReducer, initState)
-
-    const { setUser } = useContext(UserContext)
     const navigate = useNavigate()
+    const dispatch = useDispatch()
+
+    const promptRequireLogin = useSelector(selectRequireLogin)
+    const haveAc = useSelector(selectHaveAc)
+    const pageLabel = useSelector(selectActionLabel)
+    const actionRadio = useSelector(selectActionRadio)
+
 
     const formActionOnChange = (e) => {
-        dispatch({ type: e.target.value })
+        dispatch(setActionRadioValue(e.target.value))
     }
 
     const onFinish = async (values) => {
-        if (loginPage.haveAc) {
+        if (haveAc) {
             const { data } = await axios.post("http://localhost:3000/auth/login", {
                 username: values.username,
                 password: values.password
@@ -46,9 +35,12 @@ const Login = () => {
             const { data: profile } = await axios.get("http://localhost:3000/auth/profile")
 
             const userProfile = { ...profile, expiresIn: data.expiresIn }
-            console.log(userProfile);
 
-            setUser(userProfile)
+            dispatch(setUser({
+                userId: profile.userId,
+                username: profile.username,
+                token: data.access_token,
+            }))
 
             navigate('/pets')
         } else {
@@ -73,7 +65,7 @@ const Login = () => {
                     content: "register success, please login."
                 });
 
-                dispatch({ type: "HAVEAC" })
+                dispatch(setActionRadioValue(actionRadio.data[0]))
             } catch (error) {
                 messageApi.open({
                     type: 'error',
@@ -86,8 +78,16 @@ const Login = () => {
         console.log('Failed:', errorInfo);
     };
 
-    const pageLabel = loginPage.haveAc ? "Login" : "Register"
+    useEffect(() => {
+        if (promptRequireLogin) {
+            messageApi.open({
+                type: "error",
+                message: "Please Login."
+            })
 
+            dispatch(setRequireLogin(false))
+        }
+    }, [])
     return (
         <Layout className="layout">
             {contextHolder}
@@ -134,12 +134,12 @@ const Login = () => {
                     </Form.Item>
 
                     <Form.Item
-                        hidden={!loginPage.haveAc}
+                        hidden={!haveAc}
                         label="Password"
                         name="password"
                         rules={[
                             {
-                                required: loginPage.haveAc,
+                                required: haveAc,
                                 message: 'Please input your password!',
                             },
                         ]}
@@ -151,20 +151,20 @@ const Login = () => {
                             offset: 8,
                             span: 16,
                         }}>
-                        <Radio.Group onChange={formActionOnChange} value={loginPage.haveAc? "HAVEAC": "NOAC"}>
+                        <Radio.Group onChange={formActionOnChange} value={actionRadio.value}>
                             <Space direction="vertical">
-                                <Radio value="HAVEAC">Already a member</Radio>
-                                <Radio value="NOAC">Register Here</Radio>
+                                <Radio value={actionRadio.data[0]}>Already a member</Radio>
+                                <Radio value={actionRadio.data[1]}>Register Here</Radio>
                             </Space>
                         </Radio.Group>
                     </Form.Item>
                     <Form.Item
-                        hidden={loginPage.haveAc}
+                        hidden={haveAc}
                         label="Password"
                         name="password-register-1"
                         rules={[
                             {
-                                required: !loginPage.haveAc,
+                                required: !haveAc,
                                 message: 'Please input your password!',
                             },
                         ]}
@@ -172,12 +172,12 @@ const Login = () => {
                         <Input.Password />
                     </Form.Item>
                     <Form.Item
-                        hidden={loginPage.haveAc}
+                        hidden={haveAc}
                         label="Confirm Password"
                         name="password-register-2"
                         rules={[
                             {
-                                required: !loginPage.haveAc,
+                                required: !haveAc,
                                 message: 'Please input your password!',
                             },
                         ]}
@@ -185,7 +185,7 @@ const Login = () => {
                         <Input.Password />
                     </Form.Item>
                     <Form.Item
-                        hidden={loginPage.haveAc}
+                        hidden={haveAc}
                         label="Staff Register Code"
                         name="staff-register-code"
                     >

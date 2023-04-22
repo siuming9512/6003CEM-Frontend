@@ -1,10 +1,11 @@
-import { useContext, useEffect } from "react";
+import { Layout } from "antd";
 import Chatroom from "../components/Chat/Chatroom";
-import UserContext from "../contexts/UserContext";
+import { Content, Header } from "antd/es/layout/layout";
 
 const Chat = () => {
-    return <Chatroom />
-    return ""
+    return <>
+        <Chatroom />
+    </>
 }
 
 export default Chat;

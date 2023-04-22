@@ -9,16 +9,35 @@ export const userSlice = createSlice({
   },
   reducers: {
     setUser: (state, action) => {
-        state.userId = action.userId
-        state.token = action.token
-        state.role = action.role
+      console.log(action);
+      state.userId = action.payload.userId
+      state.token = action.payload.token
+      state.username = action.payload.username
+      state.role = action.payload.role
+    },
+    clearUser: (state) => {
+      state.userId = ""
+      state.token = ""
+      state.username = ""
+      state.role = ""
     }
   },
 })
 
 export const selectIsLoggedIn = (state) => !!state.user.token
-
+export const selectUser = (state) => {
+  if(!!state.user.token) {
+    return {
+      userId: state.user.userId,
+      username: state.user.username,
+      token: state.user.token,
+      role: state.user.role
+    }
+  } else {
+    return null;
+  }
+}
 // Action creators are generated for each case reducer function
-export const { setUser } = userSlice.actions
+export const { setUser, clearUser } = userSlice.actions
 
 export default userSlice.reducer

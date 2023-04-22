@@ -8,11 +8,11 @@ import BaseLayout from './layouts/BaseLayout';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
-import UserContext from './contexts/UserContext';
 import Chat from './pages/Chat';
 import RouteGuard from './layouts/RouteGuard';
 import { Provider } from 'react-redux';
-import store from './store';
+import { store, persistor } from './store';
+import { PersistGate } from 'redux-persist/integration/react';
 const router = createBrowserRouter([
   {
     path: "/pets",
@@ -28,19 +28,22 @@ const router = createBrowserRouter([
   },
   {
     path: "/chat",
-    // element: <RouteGuard><Chat /></RouteGuard>
-    element: <Chat />
+    element:
+      <BaseLayout>
+        <RouteGuard>
+          <Chat />
+        </RouteGuard>
+      </BaseLayout>
+    // element: <Chat />
   }
 ]);
 
 const queryClient = new QueryClient()
 
 const App = () => {
-  const [user, setUser] = useState(null)
-
   // return (
   //   <UserContext.Provider value={{ user, setUser }}>
-  //     <QueryClientProvider client={queryClient}>
+  //     <QueryClientProvider client={q·ueryClient}>
   //       <React.StrictMode>
   //         <RouterProvider router={router}></RouterProvider>
   //       </React.StrictMode>
@@ -48,11 +51,13 @@ const App = () => {
   //   </UserContext.Provider>)
   return (
     <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <React.StrictMode>
+      <PersistGate loading={null} persistor={persistor}>
+        <QueryClientProvider client={queryClient}>
+          {/* <React.StrictMode> */}
           <RouterProvider router={router}></RouterProvider>
-        </React.StrictMode>
-      </QueryClientProvider>
+          {/* </React.StrictMode> */}
+        </QueryClientProvider>
+      </PersistGate>
     </Provider>
   )
 }

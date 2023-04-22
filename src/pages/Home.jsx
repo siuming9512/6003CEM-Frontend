@@ -3,6 +3,9 @@ import { FloatButton } from 'antd';
 import { CustomerServiceFilled, CustomerServiceOutlined, PlusOutlined } from '@ant-design/icons';
 import { useQuery } from 'react-query';
 import UserPetCard from '../components/Pet/UserPetCard';
+import { useNavigate } from 'react-router-dom';
+
+
 
 const getPets = async () => {
     const { data } = await axios.get('http://localhost:3000/pets')
@@ -25,7 +28,11 @@ const onFavourite = async (petId, favouriteState) => {
 
 
 const Home = () => {
+    const navigate = useNavigate()
 
+    const goToChat = () => {
+        navigate("/chat")
+    }
     const { isSuccess: petIsSuccess, data: pets, refetch: petRefetch } = useQuery({ queryKey: ['pets'], queryFn: getPets })
 
     if (!petIsSuccess) return 'Loading...'
@@ -36,7 +43,7 @@ const Home = () => {
         <div style={{ display: "flex", flexWrap: "wrap" }}>
             {petCardItems}
         </div>
-        <FloatButton type="primary" icon={<CustomerServiceFilled />} />
+        <FloatButton type="primary" icon={<CustomerServiceFilled />} onClick={goToChat}/>
     </>
 }
 export default Home;

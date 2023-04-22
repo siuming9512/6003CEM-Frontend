@@ -1,11 +1,13 @@
-import { useContext, useState } from "react";
-import UserContext from "../../contexts/UserContext";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "antd";
 import { UserOutlined } from "@ant-design/icons";
+import { useDispatch, useSelector } from "react-redux";
+import { clearUser, selectUser } from "../../store/userSlice";
 
 const LoginBar = () => {
-    const { user, setUser } = useContext(UserContext)
+    const user = useSelector(selectUser)
+    const dispatch = useDispatch()
     const [ logoutHover, setLogoutHover ] = useState(false)
     const navigate = useNavigate()
 
@@ -14,7 +16,7 @@ const LoginBar = () => {
     }
 
     const onLogout = () => {
-        setUser(null)
+        dispatch(clearUser)
     }
 
     if (user == null) {
