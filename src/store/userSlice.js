@@ -5,25 +5,27 @@ export const userSlice = createSlice({
   initialState: {
     userId: "",
     token: "",
-    role: ""
+    username: "",
+    staffNo: ""
   },
   reducers: {
     setUser: (state, action) => {
-      console.log(action);
+      console.log('action', action.payload);
       state.userId = action.payload.userId
       state.token = action.payload.token
       state.username = action.payload.username
-      state.role = action.payload.role
+      state.staffNo = action.payload.staffNo
     },
     clearUser: (state) => {
       state.userId = ""
       state.token = ""
       state.username = ""
-      state.role = ""
+      state.staffNo = ""
     }
   },
 })
 
+export const selectIsStaff = (state) => !!state.user.staffNo
 export const selectIsLoggedIn = (state) => !!state.user.token
 export const selectUser = (state) => {
   if(!!state.user.token) {
@@ -31,7 +33,7 @@ export const selectUser = (state) => {
       userId: state.user.userId,
       username: state.user.username,
       token: state.user.token,
-      role: state.user.role
+      staffNo: state.user.staffNo
     }
   } else {
     return null;

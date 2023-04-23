@@ -40,6 +40,7 @@ const Login = () => {
                 userId: profile.userId,
                 username: profile.username,
                 token: data.access_token,
+                staffNo: profile.staffNo
             }))
 
             navigate('/pets')

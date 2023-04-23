@@ -27,7 +27,6 @@ export const selectRequireLogin = (state) => state.loginPage.requireLogin
 export const selectReturnUrl = (state) => state.loginPage.returnUrl
 export const selectActionRadio = (state) => state.loginPage.actionRadio
 export const selectHaveAc = (state) => state.loginPage.actionRadio.value == state.loginPage.actionRadio.data[0]
-
 export const selectActionLabel = createSelector([selectHaveAc], (haveAc) => {
     if(haveAc) {
         return "Login"

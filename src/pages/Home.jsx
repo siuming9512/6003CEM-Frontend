@@ -1,9 +1,12 @@
 import axios from 'axios';
-import { FloatButton } from 'antd';
-import { CustomerServiceFilled, CustomerServiceOutlined, PlusOutlined } from '@ant-design/icons';
+import { FloatButton, Popover } from 'antd';
+import { CustomerServiceFilled, CustomerServiceOutlined, MessageOutlined, PlusOutlined } from '@ant-design/icons';
 import { useQuery } from 'react-query';
 import UserPetCard from '../components/Pet/UserPetCard';
 import { useNavigate } from 'react-router-dom';
+import UserChatroom from '../components/Chat/Theme/UserChatroom';
+import { useSelector } from 'react-redux';
+import { selectIsStaff } from '../store/userSlice';
 
 
 
@@ -28,6 +31,7 @@ const onFavourite = async (petId, favouriteState) => {
 
 
 const Home = () => {
+    const isStaff = useSelector(selectIsStaff)
     const navigate = useNavigate()
 
     const goToChat = () => {
@@ -39,11 +43,15 @@ const Home = () => {
     const petCardItems = pets.map(x => <UserPetCard key={x.id} pet={x} onFavourite={onFavourite} />)
 
 
+    const chatFloatBtn = !isStaff ? (
+        <Popover placement="topRight" title="Chatroom" trigger="click" content={<div style={{ width: "500px", height: "400px", borderTop: "1px solid #efefef", padding: "0 10px" }} ><UserChatroom /></div>}>
+            <FloatButton type="primary" icon={<MessageOutlined />} />
+        </Popover>) : ""
     return <>
         <div style={{ display: "flex", flexWrap: "wrap" }}>
             {petCardItems}
         </div>
-        <FloatButton type="primary" icon={<CustomerServiceFilled />} onClick={goToChat}/>
+        {chatFloatBtn}
     </>
 }
 export default Home;

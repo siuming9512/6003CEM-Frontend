@@ -36,7 +36,7 @@ const BaseLayout = ({ children }) => {
       </Header>
       <Content
         style={{
-          padding: '0 50px',
+          // padding: '0 50px',
           height: '100%'
         }}
       >

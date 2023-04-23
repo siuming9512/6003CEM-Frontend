@@ -1,0 +1,4 @@
+.userChatList:hover, .userChatList.selected {
+    background-color: #dfdfdf;
+    cursor: pointer;
+}
