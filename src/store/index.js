@@ -12,17 +12,20 @@ import storage from 'redux-persist/lib/storage/session';
 import userSlice from './userSlice'
 import chatroomSlice from './chatroomSlice'
 import loginSlice from './loginSlice'
+import searchBarSlice from './searchBarSlice';
 
 
 const reducers = combineReducers({
     user: userSlice,
     chatroom: chatroomSlice,
-    loginPage: loginSlice
+    loginPage: loginSlice,
+    searchBar: searchBarSlice
 })
 
 const persistConfig = {
     key: 'root',
     storage,
+    blacklist: ['searchBar']
 };
 
 const persistedReducer = persistReducer(persistConfig, reducers);

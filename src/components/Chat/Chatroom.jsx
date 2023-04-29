@@ -10,13 +10,13 @@ import { selectIsLoggedIn, selectUser } from "../../store/userSlice";
 import { selectInput, selectMessages, setInput, setMessage, setMessages } from "../../store/chatroomSlice";
 import moment from "moment";
 import { ws } from "./socket"
+import {  getMessagesByChatroomId } from "../../apis/chatApi";
 const convertMessage = (message) => {
     return { sendBy: message.sendBy, message: message.message, createdAt: message.createdAt }
 }
 
 const getMessages = async (chatroomId) => {
-    const { data } = await axios.get(`http://localhost:3000/chat/msgs/${chatroomId}`)
-    console.log(chatroomId);
+    const data = await getMessagesByChatroomId(chatroomId)
     return data.map(x => convertMessage(x))
 }
 

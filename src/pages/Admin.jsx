@@ -5,6 +5,7 @@ import { useQuery } from 'react-query';
 import EditPetCard from '../components/Pet/EditPetCard';
 import PetForm from '../components/Pet/PetForm';
 import { useState } from 'react';
+import { createPet, deletePet, editPet, getPets } from '../apis/petApi';
 
 const Admin = () => {
     const [action, setAction] = useState(null)
@@ -12,10 +13,10 @@ const Admin = () => {
     const petFormOnSubmitted = async (values) => {
         switch (action) {
             case 'create':
-                await createPet(values)
+                await createPet(values.variety, values.gender, values.age, values.fileName)
                 break;
             case 'edit':
-                await editPet(values)
+                await editPet(values.petId, values.variety, values.gender, values.age, values.fileName)
                 break;
         }
         setIsModalOpen(false)
@@ -23,43 +24,9 @@ const Admin = () => {
         setAction(null)
     }
 
-    const getPets = async () => {
-        const { data } = await axios.get('http://localhost:3000/pets')
 
-        return data.map(x => ({ key: x.id, ...x }));
-    }
 
-    const createPet = async (values) => {
-        const data = {
-            variety: values.variety,
-            gender: values.gender,
-            age: values.age,
-            imageFileName: values.fileName,
-        }
-
-        await axios.post("http://localhost:3000/pets", data)
-    };
-
-    const editPet = async (values) => {
-        const data = {
-            variety: values.variety,
-            gender: values.gender,
-            age: values.age,
-        }
-
-        if (!!values.fileName) {
-            data.imageFileName = values.fileName
-        }
-
-        await axios.patch(`http://localhost:3000/pets/${values.petId}`, data)
-    }
-
-    const deletePet = async (petId) => {
-        await axios.delete(`http://localhost:3000/pets/${petId}`)
-        petRefetch()
-    };
-
-    const { isSuccess: petIsSuccess, data: pets, refetch: petRefetch } = useQuery({ queryKey: ['pets'], queryFn: getPets })
+    const { isSuccess: petIsSuccess, data: pets, refetch: petRefetch } = useQuery({ queryKey: ['pets', null, null, null, null], queryFn: () => getPets(null, null, null, null, null) })
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editPetSource, setEditPetSource] = useState(null)
     const [modalTitle, setModalTitle] = useState('')
@@ -78,8 +45,13 @@ const Admin = () => {
         setIsModalOpen(true)
     }
 
+    const onDelete = async (petId) => {
+        await deletePet(petId)
+        petRefetch()
+    }
+
     if (!petIsSuccess) return 'Loading...'
-    const petCardItems = pets.map(x => <EditPetCard key={x.id} pet={x} isFavourite={true} onDelete={deletePet} onEdit={onEdit} />)
+    const petCardItems = pets.map(x => <EditPetCard key={x.id} pet={x} isFavourite={true} onDelete={onDelete} onEdit={onEdit} />)
 
     return <>
         <Modal open={isModalOpen} title={modalTitle} footer={null} onCancel={() => setIsModalOpen(false)}>

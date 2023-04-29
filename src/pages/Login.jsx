@@ -3,9 +3,10 @@ import axios from 'axios';
 import { useEffect, useReducer } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Content, Header } from 'antd/es/layout/layout';
-import { setUser } from '../store/userSlice';
+import { setToken, setUser } from '../store/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectActionLabel, selectActionRadio, selectHaveAc, selectRequireLogin, setActionRadioValue, setRequireLogin } from '../store/loginSlice';
+import { getProfile, login, register } from '../apis/userApi';
 
 const Login = () => {
     const [messageApi, contextHolder] = message.useMessage();
@@ -25,22 +26,17 @@ const Login = () => {
 
     const onFinish = async (values) => {
         if (haveAc) {
-            const { data } = await axios.post("http://localhost:3000/auth/login", {
-                username: values.username,
-                password: values.password
-            })
+            const data = await login(values.username, values.password)
 
-            axios.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`
+            dispatch(setToken(data.access_token))
 
-            const { data: profile } = await axios.get("http://localhost:3000/auth/profile")
-
-            const userProfile = { ...profile, expiresIn: data.expiresIn }
+            const profile = await getProfile()
 
             dispatch(setUser({
                 userId: profile.userId,
                 username: profile.username,
-                token: data.access_token,
-                staffNo: profile.staffNo
+                staffNo: profile.staffNo,
+                chatroomId: profile.chatroomId
             }))
 
             navigate('/pets')
@@ -54,12 +50,7 @@ const Login = () => {
             }
 
             try {
-                const { data } = await axios.post("http://localhost:3000/users", {
-                    username: values.username,
-                    password: values["password-register-1"],
-                    staffRegisterCode: values['staff-register-code']
-                })
-
+                await register(values.username, values["password-register-1"], values['staff-register-code'])
 
                 messageApi.open({
                     type: 'success',
@@ -80,11 +71,12 @@ const Login = () => {
     };
 
     useEffect(() => {
+        console.log(promptRequireLogin);
         if (promptRequireLogin) {
             messageApi.open({
-                type: "error",
-                message: "Please Login."
-            })
+                type: 'error',
+                content: "Please Login."
+            });
 
             dispatch(setRequireLogin(false))
         }

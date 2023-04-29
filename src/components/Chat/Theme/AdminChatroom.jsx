@@ -8,16 +8,12 @@ import UserChat from "../UserChat";
 import { useEffect, useState } from "react";
 import { selectCurrentChatroom, setCurrentChatroom } from "../../../store/chatroomSlice";
 import { ws } from "../socket";
+import { getChatrooms } from "../../../apis/chatApi";
 
 const AdminChatroom = () => {
     const dispatch = useDispatch()
     const currentChatroomId = useSelector(selectCurrentChatroom)
     const user = useSelector(selectUser)
-    const getChatrooms = async () => {
-        const { data } = await axios.get(`http://localhost:3000/chat/chatrooms`)
-
-        return data
-    }
 
     const { data: userChatrooms, isLoading, refetch } = useQuery({ queryKey: ['chatrooms'], queryFn: getChatrooms, initialData: [] })
 

@@ -6,52 +6,64 @@ import UserPetCard from '../components/Pet/UserPetCard';
 import { useNavigate } from 'react-router-dom';
 import UserChatroom from '../components/Chat/Theme/UserChatroom';
 import { useSelector } from 'react-redux';
-import { selectIsStaff } from '../store/userSlice';
+import { selectIsStaff, selectUser } from '../store/userSlice';
+import { useState } from 'react';
+import moment from 'moment';
+import { favourite, getPets, unfavourite } from '../apis/petApi';
+import { chat } from '../apis/chatApi';
+import SearchBar from '../components/SearchBar';
+import { selectSearchCurrentValue } from '../store/searchBarSlice';
 
-
-
-const getPets = async () => {
-    const { data } = await axios.get('http://localhost:3000/pets')
-
-    return data.map(x => ({ key: x.id, ...x }));
-}
 
 const onFavourite = async (petId, favouriteState) => {
-    console.log('state', favouriteState);
     if (favouriteState) {
-        await axios.post('http://localhost:3000/pets/favourite', {
-            petId
-        })
+        await favourite(petId)
     } else {
-        await axios.post('http://localhost:3000/pets/unfavourite', {
-            petId
-        })
+        await unfavourite(petId)
     }
 }
+
+
 
 
 const Home = () => {
-    const isStaff = useSelector(selectIsStaff)
     const navigate = useNavigate()
+    const isStaff = useSelector(selectIsStaff)
 
-    const goToChat = () => {
-        navigate("/chat")
+    if (isStaff) {
+        navigate("/admin")
     }
-    const { isSuccess: petIsSuccess, data: pets, refetch: petRefetch } = useQuery({ queryKey: ['pets'], queryFn: getPets })
 
-    if (!petIsSuccess) return 'Loading...'
-    const petCardItems = pets.map(x => <UserPetCard key={x.id} pet={x} onFavourite={onFavourite} />)
+    const user = useSelector(selectUser)
+    const [open, setOpen] = useState(false);
+    const searchBarCurrent = useSelector(selectSearchCurrentValue)
+    const { isSuccess: petIsSuccess, data: pets, refetch: petRefetch } = useQuery({ queryKey: ['pets', searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max, searchBarCurrent.favourite], queryFn: () => getPets(searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max, searchBarCurrent.favourite) })
 
+    const enquiry = async (chatroomId, userId, message) => {
+        await chat(chatroomId, userId, message)
 
-    const chatFloatBtn = !isStaff ? (
-        <Popover placement="topRight" title="Chatroom" trigger="click" content={<div style={{ width: "500px", height: "400px", borderTop: "1px solid #efefef", padding: "0 10px" }} ><UserChatroom /></div>}>
-            <FloatButton type="primary" icon={<MessageOutlined />} />
-        </Popover>) : ""
+        setOpen(true)
+    }
+
+    const petCardItems = petIsSuccess? pets.map(x => <UserPetCard key={x.id} pet={x} onFavourite={onFavourite} onEnquiry={async (msg) => { await enquiry(user.chatroomId, user.userId, msg) }} />) : "Loading..."
+    
+    const popover = open ? (
+        <div style={{
+            width: "500px",
+            height: "400px",
+            borderTop: "1px solid #efefef",
+            padding: "0 10px"
+        }} >
+            <UserChatroom />
+        </div>) : ""
     return <>
+        <SearchBar isAdmin={false} />
         <div style={{ display: "flex", flexWrap: "wrap" }}>
             {petCardItems}
         </div>
-        {chatFloatBtn}
+        <Popover placement="topRight" title="Chatroom" trigger="click" open={open} onOpenChange={(e) => setOpen(e)} content={popover}>
+            <FloatButton type="primary" icon={<MessageOutlined />} />
+        </Popover>
     </>
 }
 export default Home;

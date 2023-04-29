@@ -1,8 +1,8 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter, useNavigate } from 'react-router-dom';
 import Home from './pages/Home';
 import BaseLayout from './layouts/BaseLayout';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -10,10 +10,28 @@ import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Chat from './pages/Chat';
 import RouteGuard from './layouts/RouteGuard';
-import { Provider } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import { store, persistor } from './store';
 import { PersistGate } from 'redux-persist/integration/react';
+import { injectStore } from './apis/axios.interceptor';
+import { selectIsStaff } from './store/userSlice';
+
+injectStore(store)
+
+const Index = () => {
+  const isStaff = useSelector(selectIsStaff)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    navigate(isStaff? "/admin": "/pets")
+  }, [])
+}
+
 const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Index />
+  },
   {
     path: "/pets",
     element: <BaseLayout><Home /></BaseLayout>
@@ -28,12 +46,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/chat",
-    element:
-      <BaseLayout>
-        <RouteGuard>
-          <Chat />
-        </RouteGuard>
-      </BaseLayout>
+    element: <BaseLayout><Chat /></BaseLayout>
     // element: <Chat />
   }
 ]);
@@ -41,21 +54,12 @@ const router = createBrowserRouter([
 const queryClient = new QueryClient()
 
 const App = () => {
-  // return (
-  //   <UserContext.Provider value={{ user, setUser }}>
-  //     <QueryClientProvider client={q·ueryClient}>
-  //       <React.StrictMode>
-  //         <RouterProvider router={router}></RouterProvider>
-  //       </React.StrictMode>
-  //     </QueryClientProvider>
-  //   </UserContext.Provider>)
+
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <QueryClientProvider client={queryClient}>
-          {/* <React.StrictMode> */}
           <RouterProvider router={router}></RouterProvider>
-          {/* </React.StrictMode> */}
         </QueryClientProvider>
       </PersistGate>
     </Provider>

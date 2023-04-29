@@ -6,21 +6,25 @@ export const userSlice = createSlice({
     userId: "",
     token: "",
     username: "",
-    staffNo: ""
+    staffNo: "",
+    chatroomId: ""
   },
   reducers: {
+    setToken: (state, action) => {
+      state.token = action.payload
+    },
     setUser: (state, action) => {
-      console.log('action', action.payload);
       state.userId = action.payload.userId
-      state.token = action.payload.token
       state.username = action.payload.username
       state.staffNo = action.payload.staffNo
+      state.chatroomId = action.payload.chatroomId
     },
     clearUser: (state) => {
-      state.userId = ""
       state.token = ""
+      state.userId = ""
       state.username = ""
       state.staffNo = ""
+      state.chatroomId = ""
     }
   },
 })
@@ -33,13 +37,14 @@ export const selectUser = (state) => {
       userId: state.user.userId,
       username: state.user.username,
       token: state.user.token,
-      staffNo: state.user.staffNo
+      staffNo: state.user.staffNo,
+      chatroomId: state.user.chatroomId
     }
   } else {
     return null;
   }
 }
 // Action creators are generated for each case reducer function
-export const { setUser, clearUser } = userSlice.actions
+export const { setUser, clearUser, setToken} = userSlice.actions
 
 export default userSlice.reducer

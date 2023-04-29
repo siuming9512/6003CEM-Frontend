@@ -3,6 +3,7 @@ import { Button, Form, Input, InputNumber, Radio, Select, Upload } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
+import { uploadFile } from "../../apis/petApi";
 
 
 
@@ -23,16 +24,7 @@ const PetForm = ({ pet, onSubmit }) => {
     const [fileList, setFileList] = useState([])
 
     const uploadTmpImage = async ({ file, onSuccess }) => {
-        let formData = new FormData()
-
-        formData.append('file', file)
-
-        const { data } = await axios({
-            method: "post",
-            url: "http://localhost:3000/pets/upload",
-            data: formData,
-            headers: { "Content-Type": "multipart/form-data" },
-        })
+        const data = await uploadFile(file)
 
         await onSuccess(data)
     }
