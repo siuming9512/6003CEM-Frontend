@@ -10,6 +10,14 @@ export const login = async (username, password) => {
     return data
 }
 
+export const loginExternal = async (token) => {
+    const { data } = await axios.post(`${host}/auth/external`, {
+        token: token
+    })
+
+    return data
+}
+
 export const register = async (username, password, staffRegisterCode) => {
     const { data } = await axios.post(`${host}/users`, {
         username: username,

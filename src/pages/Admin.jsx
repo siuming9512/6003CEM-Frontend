@@ -6,6 +6,9 @@ import EditPetCard from '../components/Pet/EditPetCard';
 import PetForm from '../components/Pet/PetForm';
 import { useState } from 'react';
 import { createPet, deletePet, editPet, getPets } from '../apis/petApi';
+import SearchBar from '../components/SearchBar';
+import { useSelector } from 'react-redux';
+import { selectSearchCurrentValue } from '../store/searchBarSlice';
 
 const Admin = () => {
     const [action, setAction] = useState(null)
@@ -24,9 +27,10 @@ const Admin = () => {
         setAction(null)
     }
 
+    const searchBarCurrent = useSelector(selectSearchCurrentValue)
 
+    const { isSuccess: petIsSuccess, data: pets, refetch: petRefetch } = useQuery({ queryKey: ['pets', searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max, searchBarCurrent.favourite], queryFn: () => getPets(searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max, searchBarCurrent.favourite) })
 
-    const { isSuccess: petIsSuccess, data: pets, refetch: petRefetch } = useQuery({ queryKey: ['pets', null, null, null, null], queryFn: () => getPets(null, null, null, null, null) })
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editPetSource, setEditPetSource] = useState(null)
     const [modalTitle, setModalTitle] = useState('')
@@ -50,10 +54,10 @@ const Admin = () => {
         petRefetch()
     }
 
-    if (!petIsSuccess) return 'Loading...'
-    const petCardItems = pets.map(x => <EditPetCard key={x.id} pet={x} isFavourite={true} onDelete={onDelete} onEdit={onEdit} />)
+    const petCardItems = !petIsSuccess ? "" : pets.map(x => <EditPetCard key={x.id} pet={x} isFavourite={true} onDelete={onDelete} onEdit={onEdit} />)
 
     return <>
+        <SearchBar isAdmin={true} />
         <Modal open={isModalOpen} title={modalTitle} footer={null} onCancel={() => setIsModalOpen(false)}>
             <PetForm pet={editPetSource} onSubmit={petFormOnSubmitted} />
         </Modal>

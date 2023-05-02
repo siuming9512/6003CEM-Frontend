@@ -10,13 +10,13 @@ const RouteGuard = ({ children }) => {
     const isLoggedIn = useSelector(selectIsLoggedIn)
     const navigate = useNavigate()
     const dispatch = useDispatch()
-    useEffect(() => {
-        console.log('loggin', isLoggedIn);
-        if (!isLoggedIn) {
-            dispatch(setRequireLogin(true))
-            navigate("/login")
-        }
-    }, [])
+    
+    console.log("123")
+
+    if (!isLoggedIn) {
+        dispatch(setRequireLogin(true))
+        navigate("/login")
+    }
 
     return children
 }

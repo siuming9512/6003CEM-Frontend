@@ -1,4 +1,4 @@
-import { Button, Checkbox, Form, Input, Layout, Menu, Radio, Space, message } from 'antd';
+import { Button, Checkbox, Col, Form, Input, Layout, Menu, Radio, Row, Space, message } from 'antd';
 import axios from 'axios';
 import { useEffect, useReducer } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -6,7 +6,9 @@ import { Content, Header } from 'antd/es/layout/layout';
 import { setToken, setUser } from '../store/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectActionLabel, selectActionRadio, selectHaveAc, selectRequireLogin, setActionRadioValue, setRequireLogin } from '../store/loginSlice';
-import { getProfile, login, register } from '../apis/userApi';
+import { getProfile, login, loginExternal, register } from '../apis/userApi';
+import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
+import { GoogleOutlined } from '@ant-design/icons';
 
 const Login = () => {
     const [messageApi, contextHolder] = message.useMessage();
@@ -19,6 +21,28 @@ const Login = () => {
     const pageLabel = useSelector(selectActionLabel)
     const actionRadio = useSelector(selectActionRadio)
 
+    const googleLogin = useGoogleLogin({
+        onSuccess: async (codeResponse) => {
+            console.log(codeResponse);
+            const data = await loginExternal(codeResponse.access_token)
+
+            dispatch(setToken(data.access_token))
+
+            const profile = await getProfile()
+
+            dispatch(setUser({
+                userId: profile.userId,
+                username: profile.username,
+                staffNo: profile.staffNo,
+                chatroomId: profile.chatroomId
+            }))
+
+            navigate('/pets')
+        },
+        onError: (error) => console.log('Login Failed:', error)
+    });
+
+
 
     const formActionOnChange = (e) => {
         dispatch(setActionRadioValue(e.target.value))
@@ -26,9 +50,16 @@ const Login = () => {
 
     const onFinish = async (values) => {
         if (haveAc) {
-            const data = await login(values.username, values.password)
+            try {
+                const data = await login(values.username, values.password)
 
-            dispatch(setToken(data.access_token))
+                dispatch(setToken(data.access_token))
+            } catch (error) {
+                messageApi.open({
+                    type: 'error',
+                    content: error.response.data.message
+                });
+            }
 
             const profile = await getProfile()
 
@@ -194,7 +225,17 @@ const Login = () => {
                             {pageLabel}
                         </Button>
                     </Form.Item>
+                    <Form.Item
+                        wrapperCol={{
+                            offset: 8,
+                            span: 16,
+                        }}
+                    >
+                        <Button icon={<GoogleOutlined />} onClick={() => googleLogin()}>Google Login</Button>
+
+                    </Form.Item>
                 </Form>
+                {/* <GoogleLogin onSuccess={responseMessage} onError={errorMessage} /> */}
             </Content>
         </Layout>
     );

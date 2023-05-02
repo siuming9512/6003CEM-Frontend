@@ -5,6 +5,7 @@ import { selectIsStaff } from "../store/userSlice";
 import axios from "axios";
 import UserChatroom from "../components/Chat/Theme/UserChatroom";
 import AdminChatroom from "../components/Chat/Theme/AdminChatroom";
+import { useEffect } from "react";
 
 
 const ChatPage = () => {
@@ -22,10 +23,14 @@ const ChatPage = () => {
     //         <Col span={20}><Chatroom /></Col>
     //     </Row>
     // )
+
+    useEffect(() => {
+        console.log('page');
+    }, [])
     if(isStaff) {
         return <AdminChatroom />
     } else {
-        return <UserChatroom />
+        // return <UserChatroom />
     }
 }
 

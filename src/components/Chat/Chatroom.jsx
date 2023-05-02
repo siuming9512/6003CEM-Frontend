@@ -7,12 +7,12 @@ import axios from "axios";
 import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { selectIsLoggedIn, selectUser } from "../../store/userSlice";
-import { selectInput, selectMessages, setInput, setMessage, setMessages } from "../../store/chatroomSlice";
+import { deleteMessage, selectInput, selectMessages, setInput, setMessage, setMessages } from "../../store/chatroomSlice";
 import moment from "moment";
 import { ws } from "./socket"
-import {  getMessagesByChatroomId } from "../../apis/chatApi";
+import { getMessagesByChatroomId } from "../../apis/chatApi";
 const convertMessage = (message) => {
-    return { sendBy: message.sendBy, message: message.message, createdAt: message.createdAt }
+    return { id: message.id, sendBy: message.sendBy, message: message.message, createdAt: message.createdAt }
 }
 
 const getMessages = async (chatroomId) => {
@@ -44,6 +44,12 @@ const Chatroom = ({ chatroomId }) => {
         dispatch(setInput(""))
     }
 
+    const deleteMessageClicked = (messageId) => {
+        socket.emit("deleteMessage", {
+            messageId
+        })
+    }
+
     const onPressEnter = (e) => {
         console.log(e.key);
         if (e.key == "Enter") {
@@ -60,6 +66,10 @@ const Chatroom = ({ chatroomId }) => {
         if (socket != null) {
             socket.on("message", (msg) => {
                 dispatch(setMessage(convertMessage(msg)))
+            });
+
+            socket.on("messageDeleted", (msg) => {
+                dispatch(deleteMessage(msg))
             });
         }
     }, [socket])
@@ -78,7 +88,7 @@ const Chatroom = ({ chatroomId }) => {
         }} ref={messagesEndRef}>
             <div style={{ width: "100%" }} >
                 {
-                    (messages ? messages : []).map((msg, i) => <Bubble key={i} msg={msg} />)
+                    (messages ? messages : []).map((msg, i) => <Bubble onMessageDelete={deleteMessageClicked} key={i} msg={msg} />)
                 }
             </div>
         </div>

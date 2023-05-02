@@ -15,6 +15,7 @@ import { store, persistor } from './store';
 import { PersistGate } from 'redux-persist/integration/react';
 import { injectStore } from './apis/axios.interceptor';
 import { selectIsStaff } from './store/userSlice';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 injectStore(store)
 
@@ -23,7 +24,7 @@ const Index = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    navigate(isStaff? "/admin": "/pets")
+    navigate(isStaff ? "/admin" : "/pets")
   }, [])
 }
 
@@ -56,13 +57,15 @@ const queryClient = new QueryClient()
 const App = () => {
 
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router}></RouterProvider>
-        </QueryClientProvider>
-      </PersistGate>
-    </Provider>
+    <GoogleOAuthProvider clientId='110911234958-vlcodc072mtciejv077s6ssnqbo13h8f.apps.googleusercontent.com'>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router}></RouterProvider>
+          </QueryClientProvider>
+        </PersistGate>
+      </Provider>
+    </GoogleOAuthProvider>
   )
 }
 
