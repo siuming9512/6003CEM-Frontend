@@ -37,7 +37,7 @@ const favouriteOptions = [
     }
 ]
 
-const SearchBar = ({ isAdmin }) => {
+const SearchBar = ({ hasFavourite }) => {
     const searchCurrent = useSelector(selectSearchCurrentValue)
     const dispatch = useDispatch()
 
@@ -101,7 +101,7 @@ const SearchBar = ({ isAdmin }) => {
         minWidth: "150px"
     }
 
-    const isFavouriteSelect = !isAdmin ?
+    const isFavouriteSelect = hasFavourite ?
         (<Col style={colStyle}>
             <Select style={selectStyle} allowClear placeholder="Select Favourite" value={searchCurrent.favourite} options={petFilter.favourite} onChange={favouriteOnSelect} />
         </Col>) : ""

@@ -39,7 +39,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin",
-    element: <BaseLayout><Admin /></BaseLayout>
+    element: <BaseLayout><RouteGuard><Admin /></RouteGuard></BaseLayout>
   },
   {
     path: "/login",
@@ -47,7 +47,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/chat",
-    element: <BaseLayout><Chat /></BaseLayout>
+    element: <BaseLayout><RouteGuard><Chat /></RouteGuard></BaseLayout>
     // element: <Chat />
   }
 ]);

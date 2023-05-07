@@ -13,13 +13,15 @@ import userSlice from './userSlice'
 import chatroomSlice from './chatroomSlice'
 import loginSlice from './loginSlice'
 import searchBarSlice from './searchBarSlice';
+import petSlice from './petSlice';
 
 
 const reducers = combineReducers({
     user: userSlice,
     chatroom: chatroomSlice,
     loginPage: loginSlice,
-    searchBar: searchBarSlice
+    searchBar: searchBarSlice,
+    pets: petSlice
 })
 
 const persistConfig = {

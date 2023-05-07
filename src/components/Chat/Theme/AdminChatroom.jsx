@@ -31,7 +31,6 @@ const AdminChatroom = () => {
 
     useEffect(() => {
         const socket = ws()
-        console.log(socket);
         socket.on("hasNewMessage", () => {
             refetch()
         });

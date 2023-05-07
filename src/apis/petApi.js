@@ -2,7 +2,7 @@ import axios from "axios";
 import { host } from ".";
 
 export const getPetById = async (petId) => {
-    const { data } = await axios.get(`${host}/pets/${petId}`)
+    const { data } = await axios.get(`${host}/pets?id=${petId}`)
 
     return data;
 }
@@ -32,18 +32,22 @@ export const getPets = async (
     variety,
     gender,
     minAge,
-    maxAge,
-    isFavourite
+    maxAge
 ) => {
     const { data } = await axios.get(`${host}/pets`, {
         params: {
             variety,
             gender,
             minAge,
-            maxAge,
-            isFavourite
+            maxAge
         }
     })
+
+    return data
+}
+
+export const getFavourites = async () => {
+    const { data } = await axios.get(`${host}/pets/favourite`)
 
     return data
 }

@@ -19,6 +19,7 @@ const PetForm = ({ pet, onSubmit }) => {
     const petFormOnSubmit = (values) => {
         onSubmit(values)
         form.resetFields();
+        setFileList([])
     }
 
     const [fileList, setFileList] = useState([])

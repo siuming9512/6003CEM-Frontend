@@ -5,14 +5,16 @@ import { useQuery } from 'react-query';
 import UserPetCard from '../components/Pet/UserPetCard';
 import { useNavigate } from 'react-router-dom';
 import UserChatroom from '../components/Chat/Theme/UserChatroom';
-import { useSelector } from 'react-redux';
-import { selectIsStaff, selectUser } from '../store/userSlice';
-import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectIsLoggedIn, selectIsStaff, selectUser } from '../store/userSlice';
+import { useEffect, useState } from 'react';
 import moment from 'moment';
-import { favourite, getPets, unfavourite } from '../apis/petApi';
+import { favourite, getFavourites, getPets, unfavourite } from '../apis/petApi';
 import { chat } from '../apis/chatApi';
 import SearchBar from '../components/SearchBar';
 import { selectSearchCurrentValue } from '../store/searchBarSlice';
+import PetCard from '../components/Pet/PetCard';
+import { selectFavouritedPets, setFavourites, setPets } from '../store/petSlice';
 
 
 const onFavourite = async (petId, favouriteState) => {
@@ -24,20 +26,32 @@ const onFavourite = async (petId, favouriteState) => {
 }
 
 
-
-
 const Home = () => {
     const navigate = useNavigate()
     const isStaff = useSelector(selectIsStaff)
-
+    const isLoggedIn = useSelector(selectIsLoggedIn)
+    const dispatch = useDispatch()
     if (isStaff) {
         navigate("/admin")
     }
 
+    useEffect(() => {
+        console.log(isLoggedIn);
+    }, [isLoggedIn])
+
+    const pets = useSelector(selectFavouritedPets)
     const user = useSelector(selectUser)
     const [open, setOpen] = useState(false);
     const searchBarCurrent = useSelector(selectSearchCurrentValue)
-    const { isSuccess: petIsSuccess, data: pets, refetch: petRefetch } = useQuery({ queryKey: ['pets', searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max, searchBarCurrent.favourite], queryFn: () => getPets(searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max, searchBarCurrent.favourite) })
+    const { isSuccess: petIsSuccess, refetch: petRefetch } = useQuery({ queryKey: ['pets', searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max], queryFn: async () => {
+        const pets = await getPets(searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max) 
+        console.log(pets);
+        dispatch(setPets(pets))
+    }})
+    const { isSuccess: favouriteIsSuccess, data: favourites, refetch: favouriteRefetch } = useQuery({ queryKey: ['favourites', petIsSuccess], queryFn: async () => {
+        const favourites = await getFavourites()
+        dispatch(setFavourites(favourites))
+    }})
 
     const enquiry = async (chatroomId, userId, message) => {
         await chat(chatroomId, userId, message)
@@ -45,8 +59,18 @@ const Home = () => {
         setOpen(true)
     }
 
-    const petCardItems = petIsSuccess? pets.map(x => <UserPetCard key={x.id} pet={x} onFavourite={onFavourite} onEnquiry={async (msg) => { await enquiry(user.chatroomId, user.userId, msg) }} />) : "Loading..."
-    
+    let petCardItems = []
+
+    if (petIsSuccess) {
+        if (isLoggedIn) {
+            petCardItems = pets.map(x => <UserPetCard key={x.id} pet={x} onFavourite={onFavourite} onEnquiry={async (msg) => { await enquiry(user.chatroomId, user.userId, msg) }} />)
+        } else {
+            petCardItems = pets.map(x => <PetCard key={x.id} pet={x} />)
+        }
+    } else {
+        petCardItems = "Loading..."
+    }
+
     const popover = open ? (
         <div style={{
             width: "500px",
@@ -57,7 +81,7 @@ const Home = () => {
             <UserChatroom />
         </div>) : ""
     return <>
-        <SearchBar isAdmin={false} />
+        <SearchBar hasFavourite={isLoggedIn} />
         <div style={{ display: "flex", flexWrap: "wrap" }}>
             {petCardItems}
         </div>

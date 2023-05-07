@@ -12,7 +12,7 @@ const BaseLayout = ({ children }) => {
   const navigate = useNavigate()
   const isStaff = useSelector(selectIsStaff)
   const [current, setCurrent] = useState();
-  let menu = [] 
+  let menu = []
 
   if (isStaff) {
     menu = [
@@ -39,36 +39,34 @@ const BaseLayout = ({ children }) => {
   }, [])
 
   return (
-    <RouteGuard>
-      <Layout className="layout" style={{ height: "100vh" }}>
-        <Header>
-          <Row justify="space-between" style={{ width: "100%" }}>
-            <Col span={12}>
-              <Menu
-                theme="dark"
-                mode="horizontal"
-                defaultSelectedKeys={['1']}
-                items={menu}
-                selectedKeys={current}
-                onClick={(e) => { setCurrent(e.key); navigate(`/${e.key}`) }}
-              />
-            </Col>
-            <Col>
-              <LoginBar />
-            </Col>
-          </Row>
-        </Header>
-        <Content
-          style={{
-            // padding: '0 50px',
-            height: '100%',
-            overflowY: 'auto'
-          }}
-        >
-          {children}
-        </Content>
-      </Layout>
-    </RouteGuard>
+    <Layout className="layout" style={{ height: "100vh" }}>
+      <Header>
+        <Row justify="space-between" style={{ width: "100%" }}>
+          <Col span={12}>
+            <Menu
+              theme="dark"
+              mode="horizontal"
+              defaultSelectedKeys={['1']}
+              items={menu}
+              selectedKeys={current}
+              onClick={(e) => { setCurrent(e.key); navigate(`/${e.key}`) }}
+            />
+          </Col>
+          <Col>
+            <LoginBar />
+          </Col>
+        </Row>
+      </Header>
+      <Content
+        style={{
+          // padding: '0 50px',
+          height: '100%',
+          overflowY: 'auto'
+        }}
+      >
+        {children}
+      </Content>
+    </Layout>
   );
 };
 export default BaseLayout;

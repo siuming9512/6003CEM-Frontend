@@ -5,10 +5,11 @@ import { useQuery } from 'react-query';
 import EditPetCard from '../components/Pet/EditPetCard';
 import PetForm from '../components/Pet/PetForm';
 import { useState } from 'react';
-import { createPet, deletePet, editPet, getPets } from '../apis/petApi';
+import { createPet, deletePet, editPet, getFavourites, getPets } from '../apis/petApi';
 import SearchBar from '../components/SearchBar';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { selectSearchCurrentValue } from '../store/searchBarSlice';
+import { selectFavouritedPets, selectPets, setFavourites, setPets } from '../store/petSlice';
 
 const Admin = () => {
     const [action, setAction] = useState(null)
@@ -23,14 +24,24 @@ const Admin = () => {
                 break;
         }
         setIsModalOpen(false)
-        petRefetch()
+        setTimeout(() => {
+            petRefetch()
+        }, 500)
         setAction(null)
     }
 
     const searchBarCurrent = useSelector(selectSearchCurrentValue)
-
-    const { isSuccess: petIsSuccess, data: pets, refetch: petRefetch } = useQuery({ queryKey: ['pets', searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max, searchBarCurrent.favourite], queryFn: () => getPets(searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max, searchBarCurrent.favourite) })
-
+    const dispatch = useDispatch()
+    const pets = useSelector(selectFavouritedPets)
+    // const { isSuccess: petIsSuccess, data: pets, refetch: petRefetch } = useQuery({ queryKey: ['pets', searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max, searchBarCurrent.favourite], queryFn: () => getPets(searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max, searchBarCurrent.favourite) })
+    const { isSuccess: petIsSuccess, refetch: petRefetch } = useQuery({ queryKey: ['pets', searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max], queryFn: async () => {
+        const pets = await getPets(searchBarCurrent.variety, searchBarCurrent.gender, searchBarCurrent.age.min, searchBarCurrent.age.max) 
+        dispatch(setPets(pets))
+    }})
+    const { isSuccess: favouriteIsSuccess, data: favourites, refetch: favouriteRefetch } = useQuery({ queryKey: ['favourites', petIsSuccess], queryFn: async () => {
+        const favourites = await getFavourites()
+        dispatch(setFavourites(favourites))
+    }})
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editPetSource, setEditPetSource] = useState(null)
     const [modalTitle, setModalTitle] = useState('')
@@ -57,7 +68,7 @@ const Admin = () => {
     const petCardItems = !petIsSuccess ? "" : pets.map(x => <EditPetCard key={x.id} pet={x} isFavourite={true} onDelete={onDelete} onEdit={onEdit} />)
 
     return <>
-        <SearchBar isAdmin={true} />
+        <SearchBar hasFavourite={false} />
         <Modal open={isModalOpen} title={modalTitle} footer={null} onCancel={() => setIsModalOpen(false)}>
             <PetForm pet={editPetSource} onSubmit={petFormOnSubmitted} />
         </Modal>
